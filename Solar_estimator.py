@@ -51,7 +51,7 @@ if language == "Kannada":
 # --- Inputs ---
 monthly_units = st.number_input(text["monthly_units"], min_value=10, step=10)
 suggested_kw = max(0.5, round(monthly_units / 126, 2))
-system_kw = st.number_input(text["manual_kw"], value=suggested_kw, min_value=0.5, step=0.1)
+system_kw_input = st.number_input(text["manual_kw"], value=suggested_kw, min_value=0.5, step=0.1)
 apply_subsidy = st.checkbox(text["apply_subsidy"])
 
 # --- Constants ---
@@ -63,10 +63,14 @@ tax_rate = 0.09
 total_rate = electricity_rate * (1 + tax_rate)  # ~₹6.76
 
 # --- Calculations ---
-panels_required = round((system_kw * 1000) / panel_watt)
+# Find number of panels first
+panels_required = round((system_kw_input * 1000) / panel_watt)
+
+# Recalculate exact system size from panels (to match subsidy slabs correctly)
+system_kw = round((panels_required * panel_watt) / 1000, 3)
 base_cost = system_kw * cost_per_kw
 
-# Subsidy Slab
+# Subsidy Slab (based on actual system size from panels)
 subsidy = 0
 if apply_subsidy:
     if system_kw <= 1:
